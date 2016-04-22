@@ -22,23 +22,28 @@ public class Server {
 	private Thread connectionEventLoop = new Thread() {
 		@Override
 		public void run() {
-			while(!isInterrupted()) {
-				try {
-					Socket clientSocket = serverSocket.accept();
-					logger.info("Client connected: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+			while(!isInterrupted()) try {
+				Socket clientSocket = serverSocket.accept();
+				logger.info("Client connected: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
 
-					clientsSockets.add(clientSocket);
+				clientsSockets.add(clientSocket);
 
-					Thread clientConnectionHandler = new Thread(new ClientConnectionHandler(clientSocket, clientsSockets));
-					clientConnectionHandler.setDaemon(true);
-					clientConnectionHandler.start();
-				} catch (SocketException e) {
-					logger.debug("Intentionally closed socket: time to stop");
-					break;
-				} catch (IOException e) {
-					logger.error("Network error", e);
-					break;
-				}
+				Thread clientConnectionHandler = new Thread(
+						new ClientConnectionHandler(
+								clientSocket,
+								clientsSockets,
+								new ChatBusinessLogic(clientSocket,  clientsSockets)
+						)
+				);
+
+				clientConnectionHandler.setDaemon(true);
+				clientConnectionHandler.start();
+			} catch (SocketException e) {
+				logger.debug("Intentionally closed socket: time to stop");
+				break;
+			} catch (IOException e) {
+				logger.error("Network error", e);
+				break;
 			}
 		}
 	};

@@ -1,5 +1,6 @@
 package com.db.edu.chat.server;
 
+import static com.db.edu.chat.server.TestUtils.sleep;
 import static org.junit.Assume.assumeNotNull;
 
 import org.junit.Test;
@@ -14,8 +15,13 @@ public class JUnitLoadTest {
 
     private IOException gotException = null;
 
-    @Test(timeout = 1000)
-    public void shouldGetMessageBackWhenSendMessage() throws IOException, InterruptedException {
+    @Test(timeout = 10000)
+    public void shouldGetMessageBackWhenSendMessage() throws IOException, InterruptedException, ServerError {
+        Server testServer;
+        testServer = new Server();
+        testServer.start();
+        sleep(500);
+
         final String sentMessage = Thread.currentThread().getName() + ";seed:" + Math.random();
         logger.debug("Sending message: " + sentMessage);
 
@@ -31,7 +37,7 @@ public class JUnitLoadTest {
                 = new BufferedReader(new InputStreamReader(readerClientSocket.getInputStream()));
 
         Thread readerClient = new Thread(new Runnable() {
-            @Override
+                @Override
             public void run() {
                 try {
                     String gotMessage;

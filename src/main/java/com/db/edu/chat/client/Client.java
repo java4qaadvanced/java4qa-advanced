@@ -9,33 +9,25 @@ import java.net.Socket;
 
 import com.db.edu.chat.server.Server;
 
-public class Client {
-	public static void main(String... args) throws IOException {
-		final Socket socket = new Socket(Server.HOST, Server.PORT);
-		final BufferedWriter socketWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-		final BufferedReader socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		final BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
+public class Client  {
+	private  ClientConsoleReader clientConsoleReader;
+	private ClientMessageReader clientMessageReader;
 
-		(new Thread() {
-			@Override
-			public void run() {
-				while(true) {
-					try {
-						String message = socketReader.readLine();
-						if(message == null) break;
-						
-						System.out.println(message);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}).start();
-		
-		while(true) {
-			socketWriter.write(consoleReader.readLine());
-			socketWriter.newLine();
-			socketWriter.flush();
-		}
+	public Client() throws IOException{
+		Socket socket = new SocketFactory().getSocket();
+		clientConsoleReader = new ClientConsoleReader(socket);
+		clientMessageReader = new ClientMessageReader(socket);
+
+
+	}
+
+	public void start(){
+		clientConsoleReader.run();
+		clientMessageReader.run();
+	}
+
+
+	public static void main(String... args) throws IOException {
+		new Client().start();
 	}
 }
