@@ -10,11 +10,12 @@ import java.net.Socket;
 import com.db.edu.chat.server.Server;
 
 public class Client  {
-	private  ClientConsoleReader clientConsoleReader;
-	private ClientMessageReader clientMessageReader;
+	private final ClientConsoleReader clientConsoleReader;
+	private final ClientMessageReader clientMessageReader;
+	private final Socket socket;
 
 	public Client() throws IOException{
-		Socket socket = new SocketFactory().getSocket();
+		socket = new SocketFactory().getSocket();
 		clientConsoleReader = new ClientConsoleReader(socket);
 		clientMessageReader = new ClientMessageReader(socket);
 
