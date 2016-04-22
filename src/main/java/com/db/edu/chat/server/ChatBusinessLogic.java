@@ -26,7 +26,6 @@ public class ChatBusinessLogic implements BusinessLogic {
             for (Socket outSocket : clientsSockets) {
 
                 if (message == null) {
-                    logger.error("Message is null");
                     break;
                 }
 
