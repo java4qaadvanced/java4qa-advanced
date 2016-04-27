@@ -6,5 +6,5 @@ import java.util.Collection;
 
 
 public interface BusinessLogic {
-    void handle() throws IOException;
+    void handle() throws MessageException;
 }

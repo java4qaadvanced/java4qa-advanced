@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Collection;
 
 public class ChatBusinessLogic implements BusinessLogic {
@@ -19,42 +20,49 @@ public class ChatBusinessLogic implements BusinessLogic {
     }
 
     @Override
-    public void handle() throws  IOException{
+    public void handle() throws MessageException{
+        BufferedReader socketReader;
+        BufferedWriter socketWriter;
+        String message = null;
+        for (Socket outSocket : clientsSockets) {
+            try {
+                socketReader = new BufferedReader(new InputStreamReader(inSocket.getInputStream()));
+                message = socketReader.readLine();
+                logger.info("The line was read");
+                if (outSocket.isClosed()) break;
+                if (!outSocket.isBound()) continue;
+                if (!outSocket.isConnected()) continue;
+                if (outSocket == this.inSocket) continue;
 
-        BufferedReader socketReader = new BufferedReader(new InputStreamReader(inSocket.getInputStream()));
-        String message = socketReader.readLine();
-            for (Socket outSocket : clientsSockets) {
-
-                if (message == null) {
-                    break;
-                }
+                if (message == null) throw new MessageException("Message is null");
 
                 logger.info("Message from client "
                         + inSocket.getInetAddress() + ":"
                         + inSocket.getPort() + "> "
                         + message);
-                if (outSocket.isClosed()) continue;
-                if (!outSocket.isBound()) continue;
-                if (!outSocket.isConnected()) continue;
-                if (outSocket == this.inSocket) continue;
+
                 logger.info("Writing message " + message + " to socket " + outSocket);
 
-                BufferedWriter socketWriter = new BufferedWriter(new OutputStreamWriter(outSocket.getOutputStream()));
+                socketWriter = new BufferedWriter(new OutputStreamWriter(outSocket.getOutputStream()));
                 socketWriter.write(message);
                 socketWriter.newLine();
                 socketWriter.flush();
 
 
-                logger.error("Removing connection " + outSocket);
 
-                try {
-                    outSocket.close();
-                } catch (IOException innerE) {
-                    logger.error("Error closing socket ", innerE);
-                }
 
+//                try {
+//                    outSocket.close();
+//                } catch (SocketException innerE) {
+//                    logger.error("Error closing socket ", innerE);
+//                }
+            } catch (IOException e) {
+                logger.error("Error: ", e);
+                throw new MessageException(e);
 
             }
+
+        }
 
     }
 }

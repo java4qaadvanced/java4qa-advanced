@@ -34,7 +34,7 @@ public class ClientConnectionHandler implements Runnable {
 			try {
 				businessLogic.handle();
 
-			} catch (IOException e) {
+			} catch (MessageException e) {
 				logger.error("Network reading message from socket " + inSocket, e);
 				try {
 					inSocket.close();
